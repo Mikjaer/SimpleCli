@@ -59,6 +59,7 @@
 				if ($limit == "*")
 				{
 					system("stty echo");
+					system("stty icanon");
 					return $c;
 				}
 				else
@@ -67,6 +68,7 @@
 					if (in_array($c,$a))
 					{
 						system("stty echo");
+						system("stty icanon");
 						return $c;
 					}
 				}
