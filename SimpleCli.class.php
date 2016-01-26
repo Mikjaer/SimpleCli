@@ -7,12 +7,38 @@
 		private $color = array("black" => 30, "red" => 31, "green" => 32, "yellow" => 33, "blue" => 34, "purple" => 35, "cyan" => 36, "white" => 37);
 		private $echo_out = true;
 
+		private $local_echo;
+
+		public function __construct()
+		{
+			$this->echoOff();
+		}
+
+		public function __destruct()
+		{
+			$this->echoOn();
+		}
+
 		private function ansi($str)
 		{
 			if ($this->echo_out)
 				print $str;
 			
 			return $str;
+		}
+
+		public function echoOff()
+		{
+			system("stty -icanon");
+			system("stty -echo");
+			$this->local_echo = false;
+		}
+
+		public function echoOn()
+		{
+			system("stty icanon");
+			system("stty echo");
+			$this->local_echo = true;
 		}
 
 		public function noEcho()
@@ -50,25 +76,32 @@
 			return $this->ansi("\e[0m");
 		}
 
-		function keyPressed($limit = "*")
+		function keyPressed()
 		{
-			system("stty -icanon");
-			system("stty -echo");
+			$result = stream_select($r = array(STDIN), $w = NULL, $e = NULL, 0);
+		//	if($result === false) throw new Exception('stream_select failed');
+			if($result === 0) return false;
+		//	$data = stream_get_line(STDIN, 1);
+			return true;
+		}
+		function readKey()
+		{
+			return stream_get_line(STDIN, 1);
+		}
+
+		function waitForKey($limit = "*",$ignoreCase = false)
+		{
 			while ($c = fread(STDIN, 1)) {
 			
 				if ($limit == "*")
 				{
-					system("stty echo");
-					system("stty icanon");
 					return $c;
 				}
 				else
 				{
-					$a = explode(",",$limit);
-					if (in_array($c,$a))
+					$a = explode(",",strtoupper($limit));
+					if (in_array(strtoupper($c),$a))
 					{
-						system("stty echo");
-						system("stty icanon");
 						return $c;
 					}
 				}
